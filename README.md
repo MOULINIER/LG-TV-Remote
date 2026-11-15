@@ -25,7 +25,7 @@ Téléchargez **[`apk/LG-Remote-1.0.apk`](apk/LG-Remote-1.0.apk)** sur le télé
 - **Clavier** : saisie de texte directement dans les champs de la TV
 - **Pavé numérique** + touches de couleur, menu rapide, liste des chaînes
 - **Extinction**, et **allumage par Wake-on-LAN** (adresse MAC détectée automatiquement, modifiable dans les réglages)
-- Retour haptique sur chaque touche
+- Retour haptique sur chaque touche, réglable dans les Réglages (désactivé, léger, moyen, fort)
 
 ## Prérequis côté TV
 

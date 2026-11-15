@@ -25,6 +25,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Backspace
 import androidx.compose.material.icons.automirrored.rounded.KeyboardReturn
 import androidx.compose.material.icons.automirrored.rounded.Send
+import androidx.compose.material.icons.rounded.Vibration
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Input
 import androidx.compose.material.icons.rounded.Remove
@@ -255,6 +259,7 @@ fun SettingsSheet(vm: RemoteViewModel, onDismiss: () -> Unit) {
     val mac by vm.mac.collectAsStateWithLifecycle()
     val tvName by vm.tvName.collectAsStateWithLifecycle()
     val state by vm.state.collectAsStateWithLifecycle()
+    val hapticLevel by vm.hapticLevel.collectAsStateWithLifecycle()
     var macField by remember(mac) { mutableStateOf(mac ?: "") }
     RemoteSheet("Réglages", onDismiss) {
         Column(Modifier.padding(horizontal = 24.dp).imePadding(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -264,6 +269,7 @@ fun SettingsSheet(vm: RemoteViewModel, onDismiss: () -> Unit) {
                 leadingContent = { Icon(Icons.Rounded.Tv, null) },
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
             )
+            HapticSetting(hapticLevel, vm::setHapticLevel)
             OutlinedTextField(
                 value = macField,
                 onValueChange = { macField = it },
@@ -281,6 +287,34 @@ fun SettingsSheet(vm: RemoteViewModel, onDismiss: () -> Unit) {
             }
             OutlinedButton(onClick = { onDismiss(); vm.forget() }, modifier = Modifier.fillMaxWidth()) {
                 Text("Déconnecter et oublier cette TV", color = MaterialTheme.colorScheme.error)
+            }
+        }
+    }
+}
+
+@Composable
+internal fun HapticSetting(level: HapticLevel, onChange: (HapticLevel) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Icon(Icons.Rounded.Vibration, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            Column {
+                Text("Retour haptique", style = MaterialTheme.typography.titleSmall)
+                Text(
+                    "Vibration à chaque appui sur une touche",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+            val levels = HapticLevel.entries
+            levels.forEachIndexed { i, l ->
+                SegmentedButton(
+                    selected = l == level,
+                    onClick = { onChange(l) },
+                    shape = SegmentedButtonDefaults.itemShape(i, levels.size),
+                    icon = {},
+                ) { Text(l.label, maxLines = 1) }
             }
         }
     }

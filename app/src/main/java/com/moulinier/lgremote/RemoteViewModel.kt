@@ -4,6 +4,8 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.moulinier.lgremote.ui.HapticLevel
+import com.moulinier.lgremote.ui.Haptics
 import com.moulinier.lgremote.tv.ConnectionState
 import com.moulinier.lgremote.tv.DiscoveredTv
 import com.moulinier.lgremote.tv.Discovery
@@ -47,12 +49,24 @@ class RemoteViewModel(app: Application) : AndroidViewModel(app) {
     private val _mac = MutableStateFlow(prefs.getString("mac", null))
     val mac = _mac.asStateFlow()
 
+    val haptics = Haptics(app)
+    private val _hapticLevel = MutableStateFlow(HapticLevel.parse(prefs.getString("haptics", null)))
+    val hapticLevel = _hapticLevel.asStateFlow()
+
+    fun setHapticLevel(level: HapticLevel) {
+        _hapticLevel.value = level
+        haptics.level = level
+        prefs.edit().putString("haptics", level.name).apply()
+        haptics.tap() // let the user feel the new strength
+    }
+
     private val _messages = MutableSharedFlow<String>(extraBufferCapacity = 4)
     val messages: SharedFlow<String> = _messages
 
     val lastHost: String? get() = prefs.getString("host", null)
 
     init {
+        haptics.level = _hapticLevel.value
         client.onClientKey = { host, key -> prefs.edit().putString("key_$host", key).apply() }
         client.onRegistered = {
             viewModelScope.launch {

@@ -1,6 +1,5 @@
 package com.moulinier.lgremote.ui
 
-import android.view.HapticFeedbackConstants
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
@@ -53,7 +52,6 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -75,7 +73,7 @@ fun RemoteKey(
     repeat: Boolean = false,
     content: @Composable BoxScope.() -> Unit,
 ) {
-    val view = LocalView.current
+    val haptics = LocalHaptics.current
     val scope = rememberCoroutineScope()
     val action by rememberUpdatedState(onPress)
     var pressed by remember { mutableStateOf(false) }
@@ -91,13 +89,13 @@ fun RemoteKey(
                 awaitEachGesture {
                     awaitFirstDown(requireUnconsumed = false)
                     pressed = true
-                    view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                    haptics?.tap()
                     action()
                     val job = if (repeat) scope.launch {
                         delay(450)
                         while (true) {
                             action()
-                            view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                            haptics?.tick()
                             delay(120)
                         }
                     } else null
@@ -175,7 +173,7 @@ fun TouchPad(
     onScroll: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val view = LocalView.current
+    val haptics = LocalHaptics.current
     val move by rememberUpdatedState(onMove)
     val click by rememberUpdatedState(onClick)
     val scroll by rememberUpdatedState(onScroll)
@@ -213,7 +211,7 @@ fun TouchPad(
                             change.consume()
                         }
                         if (travelled < viewConfiguration.touchSlop && lastUp - start < 300) {
-                            view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                            haptics?.tap()
                             click()
                         }
                     }
@@ -253,7 +251,7 @@ fun TouchPad(
                             acc += change.positionChange().y
                             if (abs(acc) > 24f) {
                                 scroll(if (acc > 0) 1 else -1)
-                                view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                                haptics?.tick()
                                 acc = 0f
                             }
                             change.consume()

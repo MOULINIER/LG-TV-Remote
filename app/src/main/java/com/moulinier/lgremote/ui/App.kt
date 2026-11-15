@@ -41,7 +41,7 @@ fun App(vm: RemoteViewModel) {
 
     LaunchedEffect(Unit) { vm.messages.collect { snackbar.showSnackbar(it) } }
 
-    CompositionLocalProvider(LocalImageLoader provides imageLoader) {
+    CompositionLocalProvider(LocalImageLoader provides imageLoader, LocalHaptics provides vm.haptics) {
         Scaffold(snackbarHost = { SnackbarHost(snackbar) }) { padding ->
             val connected = state is ConnectionState.Connected
             AnimatedContent(
