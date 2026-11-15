@@ -3,6 +3,8 @@
 Application Android moderne (Kotlin + Jetpack Compose, **Material Design 3** avec couleurs dynamiques Material You, thème clair/sombre) pour piloter une TV LG webOS via le Wi-Fi.
 
 <p>
+<img src="docs/icon.png" width="420">
+
 <img src="docs/remote_dark.png" width="260"> <img src="docs/remote_light.png" width="260"> <img src="docs/connect_dark.png" width="260">
 </p>
 
