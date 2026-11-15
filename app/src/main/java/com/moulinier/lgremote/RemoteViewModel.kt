@@ -57,7 +57,7 @@ class RemoteViewModel(app: Application) : AndroidViewModel(app) {
         _hapticLevel.value = level
         haptics.level = level
         prefs.edit().putString("haptics", level.name).apply()
-        haptics.tap() // let the user feel the new strength
+        haptics.preview(level) // let the user feel the new strength
     }
 
     private val _messages = MutableSharedFlow<String>(extraBufferCapacity = 4)

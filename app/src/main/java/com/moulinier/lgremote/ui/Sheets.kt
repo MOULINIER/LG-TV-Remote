@@ -27,6 +27,7 @@ import androidx.compose.material.icons.automirrored.rounded.KeyboardReturn
 import androidx.compose.material.icons.automirrored.rounded.Send
 import androidx.compose.material.icons.rounded.Vibration
 import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material.icons.rounded.Close
@@ -269,7 +270,12 @@ fun SettingsSheet(vm: RemoteViewModel, onDismiss: () -> Unit) {
                 leadingContent = { Icon(Icons.Rounded.Tv, null) },
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
             )
-            HapticSetting(hapticLevel, vm::setHapticLevel)
+            HapticSetting(
+                hapticLevel,
+                onChange = vm::setHapticLevel,
+                onTest = { vm.haptics.preview(hapticLevel) },
+                problem = remember { vm.haptics.problem() },
+            )
             OutlinedTextField(
                 value = macField,
                 onValueChange = { macField = it },
@@ -293,11 +299,16 @@ fun SettingsSheet(vm: RemoteViewModel, onDismiss: () -> Unit) {
 }
 
 @Composable
-internal fun HapticSetting(level: HapticLevel, onChange: (HapticLevel) -> Unit) {
+internal fun HapticSetting(
+    level: HapticLevel,
+    onChange: (HapticLevel) -> Unit,
+    onTest: () -> Unit,
+    problem: String?,
+) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Icon(Icons.Rounded.Vibration, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-            Column {
+            Column(Modifier.weight(1f)) {
                 Text("Retour haptique", style = MaterialTheme.typography.titleSmall)
                 Text(
                     "Vibration à chaque appui sur une touche",
@@ -305,6 +316,7 @@ internal fun HapticSetting(level: HapticLevel, onChange: (HapticLevel) -> Unit) 
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+            TextButton(onClick = onTest, enabled = level != HapticLevel.Off) { Text("Tester") }
         }
         SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
             val levels = HapticLevel.entries
@@ -316,6 +328,9 @@ internal fun HapticSetting(level: HapticLevel, onChange: (HapticLevel) -> Unit) 
                     icon = {},
                 ) { Text(l.label, maxLines = 1) }
             }
+        }
+        if (problem != null && level != HapticLevel.Off) {
+            Text(problem, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
         }
     }
 }
