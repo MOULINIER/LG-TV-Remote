@@ -56,7 +56,7 @@ class ScreenshotTest {
             LgRemoteTheme(dark = true) {
                 var level by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(com.moulinier.lgremote.ui.HapticLevel.Medium) }
                 androidx.compose.material3.Surface(Modifier.testTag("haptic"), color = MaterialTheme.colorScheme.surfaceContainerLow) {
-                    Box(Modifier.padding(24.dp)) { com.moulinier.lgremote.ui.HapticSetting(level, { level = it }, {}, null) }
+                    Box(Modifier.padding(24.dp)) { com.moulinier.lgremote.ui.HapticSetting(level, { level = it }, null) }
                 }
             }
         }

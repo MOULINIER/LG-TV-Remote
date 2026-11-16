@@ -27,7 +27,6 @@ import androidx.compose.material.icons.automirrored.rounded.KeyboardReturn
 import androidx.compose.material.icons.automirrored.rounded.Send
 import androidx.compose.material.icons.rounded.Vibration
 import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material.icons.rounded.Close
@@ -273,7 +272,6 @@ fun SettingsSheet(vm: RemoteViewModel, onDismiss: () -> Unit) {
             HapticSetting(
                 hapticLevel,
                 onChange = vm::setHapticLevel,
-                onTest = { vm.haptics.preview(hapticLevel) },
                 problem = remember { vm.haptics.problem() },
             )
             OutlinedTextField(
@@ -302,7 +300,6 @@ fun SettingsSheet(vm: RemoteViewModel, onDismiss: () -> Unit) {
 internal fun HapticSetting(
     level: HapticLevel,
     onChange: (HapticLevel) -> Unit,
-    onTest: () -> Unit,
     problem: String?,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -316,7 +313,6 @@ internal fun HapticSetting(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            TextButton(onClick = onTest, enabled = level != HapticLevel.Off) { Text("Tester") }
         }
         SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
             val levels = HapticLevel.entries
