@@ -66,6 +66,12 @@ class ScreenshotTest {
         compose.onNodeWithTag("hand").captureRoboImage("../docs/one_handed_setting.png")
     }
 
+    @Test fun connectingPowerOn() {
+        val vm = vm()
+        vm.setMac("AA:BB:CC:DD:EE:FF")
+        shot("connecting_power_on", true) { ConnectScreen(vm, ConnectionState.Connecting("192.168.1.42")) }
+    }
+
     @Test fun connectDark() {
         val vm = vm()
         shot("connect_dark", true) { ConnectScreen(vm, ConnectionState.Failed("192.168.1.42", "timeout")) }

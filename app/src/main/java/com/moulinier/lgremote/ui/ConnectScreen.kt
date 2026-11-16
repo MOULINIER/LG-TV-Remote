@@ -19,6 +19,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.ErrorOutline
+import androidx.compose.material.icons.rounded.PowerSettingsNew
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Tv
 import androidx.compose.material.icons.rounded.WifiFind
@@ -81,7 +82,21 @@ fun ConnectScreen(vm: RemoteViewModel, state: ConnectionState) {
 
         // Status of the last / current connection attempt
         when (state) {
-            is ConnectionState.Connecting -> StatusCard("Connexion à ${tvName ?: state.host}…", null, progress = true)
+            // Offer power-on right away: a TV that is off only fails after the connect timeouts.
+            is ConnectionState.Connecting -> StatusCard(
+                "Connexion à ${tvName ?: state.host}…",
+                if (mac != null) "La TV est éteinte ? Allumez-la sans attendre." else null,
+                progress = true,
+                actions = if (mac != null) {
+                    {
+                        Button(onClick = vm::powerOn) {
+                            Icon(Icons.Rounded.PowerSettingsNew, null, Modifier.size(18.dp))
+                            Spacer(Modifier.size(8.dp))
+                            Text("Allumer la TV")
+                        }
+                    }
+                } else null,
+            )
             is ConnectionState.Failed -> StatusCard(
                 "Impossible de joindre ${tvName ?: state.host}",
                 state.message,
