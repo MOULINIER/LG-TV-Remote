@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -17,13 +19,37 @@ android {
         versionName = "1.0"
     }
 
+    // Fixed release key, so every build (local or CI) can update an installed copy.
+    // Read from signing/keystore.properties (local, gitignored) or from environment
+    // variables (CI secrets). Without either, release builds fall back to the debug key.
+    val keyProps = Properties().apply {
+        val f = rootProject.file("signing/keystore.properties")
+        if (f.exists()) f.inputStream().use(::load)
+    }
+    fun signingValue(prop: String, env: String): String? =
+        System.getenv(env)?.takeIf { it.isNotBlank() } ?: keyProps.getProperty(prop)
+    val releaseStore = signingValue("storeFile", "SIGNING_STORE_FILE")?.let(rootProject::file)
+
+    signingConfigs {
+        if (releaseStore != null && releaseStore.exists()) {
+            create("release") {
+                storeFile = releaseStore
+                storePassword = signingValue("storePassword", "SIGNING_STORE_PASSWORD")
+                keyAlias = signingValue("keyAlias", "SIGNING_KEY_ALIAS")
+                keyPassword = signingValue("keyPassword", "SIGNING_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            // Signed with the debug key so the APK installs directly (sideload).
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.findByName("release") ?: run {
+                logger.warn("No release key configured: signing the release APK with the debug key.")
+                signingConfigs.getByName("debug")
+            }
         }
     }
     compileOptions {

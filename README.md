@@ -39,7 +39,22 @@ Téléchargez **[`apk/LG-Remote-1.0.apk`](apk/LG-Remote-1.0.apk)** sur le télé
 ./gradlew testDebugUnitTest -Proborazzi.test.record=true   # régénère les captures dans docs/
 ```
 
-L'APK de release est signé avec la clé de debug pour pouvoir l'installer directement. Pour une publication sur le Play Store, configurez votre propre `signingConfig`.
+### Signature
+
+L'APK de release est signé avec une clé fixe, pour que chaque nouvelle version s'installe par-dessus la précédente. La clé n'est **pas** dans le dépôt :
+
+- **En local** : placez `release.jks` et `keystore.properties` dans un dossier `signing/` à la racine (ignoré par git). Format de `keystore.properties` :
+  ```properties
+  storeFile=signing/release.jks
+  storePassword=…
+  keyAlias=lgremote
+  keyPassword=…
+  ```
+- **Sur GitHub Actions** : secrets `SIGNING_KEYSTORE_BASE64` (le fichier `.jks` en base64), `SIGNING_STORE_PASSWORD`, `SIGNING_KEY_ALIAS` et `SIGNING_KEY_PASSWORD`.
+
+Sans clé configurée, le build retombe sur la clé de debug de la machine : l'APK obtenu ne pourra pas mettre à jour une version signée avec la clé fixe.
+
+Empreinte SHA-256 du certificat : `eb4b919d3679167e29ac330bce536c7d3f2796e1bac17af4c584f21e9e06a05b`
 
 ## Technique
 
