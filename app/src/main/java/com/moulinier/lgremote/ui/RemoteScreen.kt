@@ -62,119 +62,127 @@ fun RemoteScreen(vm: RemoteViewModel) {
     val muted by vm.muted.collectAsStateWithLifecycle()
     var sheet by rememberSaveable { mutableStateOf(Sheet.None) }
     var touchMode by rememberSaveable { mutableStateOf(false) }
+    val handedness by vm.handedness.collectAsStateWithLifecycle()
+    val oneHandScale by vm.oneHandScale.collectAsStateWithLifecycle()
     val cs = MaterialTheme.colorScheme
 
-    Column(
-        Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(14.dp),
+    OneHandedBox(
+        handedness,
+        oneHandScale,
+        onSwitchSide = { vm.setHandedness(if (handedness == Handedness.Left) Handedness.Right else Handedness.Left) },
     ) {
-        // Header
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) {
-                Text(
-                    tvName ?: "TV LG",
-                    style = MaterialTheme.typography.titleLarge,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Text(
-                    buildString {
-                        append("Connectée")
-                        volume?.let { append(" · Volume $it") }
-                        if (muted) append(" · Muet")
-                    },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = cs.primary,
-                )
-            }
-            IconButton(onClick = { sheet = Sheet.Settings }) { Icon(Icons.Rounded.Settings, "Réglages") }
-            IconKey(
-                Icons.Rounded.PowerSettingsNew, "Éteindre", vm::powerOff,
-                size = 48.dp, color = cs.errorContainer, contentColor = cs.onErrorContainer,
-            )
-        }
-
-        // Quick actions
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            QuickAction(Icons.Rounded.Input, "Source") { vm.loadInputs(); sheet = Sheet.Inputs }
-            QuickAction(Icons.Rounded.Apps, "Apps") { vm.loadApps(); sheet = Sheet.Apps }
-            QuickAction(Icons.Rounded.Keyboard, "Clavier") { sheet = Sheet.Keyboard }
-            QuickAction(Icons.Rounded.Dialpad, "123") { sheet = Sheet.Numbers }
-        }
-
-        SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-            SegmentedButton(
-                selected = !touchMode, onClick = { touchMode = false },
-                shape = SegmentedButtonDefaults.itemShape(0, 2),
-                icon = { SegmentedButtonDefaults.Icon(!touchMode) { Icon(Icons.Rounded.Gamepad, null, Modifier.size(18.dp)) } },
-            ) { Text("Croix") }
-            SegmentedButton(
-                selected = touchMode, onClick = { touchMode = true },
-                shape = SegmentedButtonDefaults.itemShape(1, 2),
-                icon = { SegmentedButtonDefaults.Icon(touchMode) { Icon(Icons.Rounded.TouchApp, null, Modifier.size(18.dp)) } },
-            ) { Text("Pavé tactile") }
-        }
-
-        // Navigation area
-        Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
-            if (touchMode) {
-                TouchPad(
-                    onMove = vm.client::move,
-                    onClick = vm.client::click,
-                    onScroll = { vm.client.scroll(0, it * 2) },
-                    modifier = Modifier.fillMaxSize(),
-                )
-            } else {
-                DPad(
-                    onUp = { vm.button("UP") },
-                    onDown = { vm.button("DOWN") },
-                    onLeft = { vm.button("LEFT") },
-                    onRight = { vm.button("RIGHT") },
-                    onOk = { vm.button("ENTER") },
-                    modifier = Modifier.fillMaxSize(),
-                )
-            }
-        }
-
-        // Back / Home / Settings
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-            IconKey(Icons.AutoMirrored.Rounded.ArrowBack, "Retour", { vm.button("BACK") })
-            IconKey(Icons.Rounded.Home, "Accueil", { vm.button("HOME") }, color = cs.secondaryContainer, contentColor = cs.onSecondaryContainer)
-            IconKey(Icons.Rounded.Tune, "Réglages TV", { vm.button("MENU") })
-        }
-
-        // Volume / channel rockers
-        Row(
-            Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
+            Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            Rocker("VOL", vm::volumeUp, vm::volumeDown)
-            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            // Header
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        tvName ?: "TV LG",
+                        style = MaterialTheme.typography.titleLarge,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Text(
+                        buildString {
+                            append("Connectée")
+                            volume?.let { append(" · Volume $it") }
+                            if (muted) append(" · Muet")
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = cs.primary,
+                    )
+                }
+                IconButton(onClick = { sheet = Sheet.Settings }) { Icon(Icons.Rounded.Settings, "Réglages") }
                 IconKey(
-                    if (muted) Icons.AutoMirrored.Rounded.VolumeOff else Icons.AutoMirrored.Rounded.VolumeUp,
-                    "Muet", vm::toggleMute,
-                    color = if (muted) cs.tertiaryContainer else cs.surfaceContainerHighest,
-                    contentColor = if (muted) cs.onTertiaryContainer else cs.onSurface,
+                    Icons.Rounded.PowerSettingsNew, "Éteindre", vm::powerOff,
+                    size = 48.dp, color = cs.errorContainer, contentColor = cs.onErrorContainer,
                 )
-                IconKey(Icons.Rounded.Info, "Infos", { vm.button("INFO") })
             }
-            Rocker("CH", vm::channelUp, vm::channelDown, upIcon = Icons.Rounded.KeyboardArrowUp, downIcon = Icons.Rounded.KeyboardArrowDown)
-        }
 
-        // Media controls
-        Row(
-            Modifier.fillMaxWidth().height(56.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            val shape = RoundedCornerShape(18.dp)
-            val m = Modifier.weight(1f).fillMaxWidth().height(56.dp)
-            MediaKey(Icons.Rounded.FastRewind, "Retour rapide", vm::rewind, m, shape)
-            MediaKey(Icons.Rounded.PlayArrow, "Lecture", vm::play, m, shape, primary = true)
-            MediaKey(Icons.Rounded.Pause, "Pause", vm::pause, m, shape)
-            MediaKey(Icons.Rounded.Stop, "Stop", vm::stop, m, shape)
-            MediaKey(Icons.Rounded.FastForward, "Avance rapide", vm::fastForward, m, shape)
+            // Quick actions
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                QuickAction(Icons.Rounded.Input, "Source") { vm.loadInputs(); sheet = Sheet.Inputs }
+                QuickAction(Icons.Rounded.Apps, "Apps") { vm.loadApps(); sheet = Sheet.Apps }
+                QuickAction(Icons.Rounded.Keyboard, "Clavier") { sheet = Sheet.Keyboard }
+                QuickAction(Icons.Rounded.Dialpad, "123") { sheet = Sheet.Numbers }
+            }
+
+            SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                SegmentedButton(
+                    selected = !touchMode, onClick = { touchMode = false },
+                    shape = SegmentedButtonDefaults.itemShape(0, 2),
+                    icon = { SegmentedButtonDefaults.Icon(!touchMode) { Icon(Icons.Rounded.Gamepad, null, Modifier.size(18.dp)) } },
+                ) { Text("Croix") }
+                SegmentedButton(
+                    selected = touchMode, onClick = { touchMode = true },
+                    shape = SegmentedButtonDefaults.itemShape(1, 2),
+                    icon = { SegmentedButtonDefaults.Icon(touchMode) { Icon(Icons.Rounded.TouchApp, null, Modifier.size(18.dp)) } },
+                ) { Text("Pavé tactile") }
+            }
+
+            // Navigation area
+            Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
+                if (touchMode) {
+                    TouchPad(
+                        onMove = vm.client::move,
+                        onClick = vm.client::click,
+                        onScroll = { vm.client.scroll(0, it * 2) },
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                } else {
+                    DPad(
+                        onUp = { vm.button("UP") },
+                        onDown = { vm.button("DOWN") },
+                        onLeft = { vm.button("LEFT") },
+                        onRight = { vm.button("RIGHT") },
+                        onOk = { vm.button("ENTER") },
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
+            }
+
+            // Back / Home / Settings
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                IconKey(Icons.AutoMirrored.Rounded.ArrowBack, "Retour", { vm.button("BACK") })
+                IconKey(Icons.Rounded.Home, "Accueil", { vm.button("HOME") }, color = cs.secondaryContainer, contentColor = cs.onSecondaryContainer)
+                IconKey(Icons.Rounded.Tune, "Réglages TV", { vm.button("MENU") })
+            }
+
+            // Volume / channel rockers
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Rocker("VOL", vm::volumeUp, vm::volumeDown)
+                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    IconKey(
+                        if (muted) Icons.AutoMirrored.Rounded.VolumeOff else Icons.AutoMirrored.Rounded.VolumeUp,
+                        "Muet", vm::toggleMute,
+                        color = if (muted) cs.tertiaryContainer else cs.surfaceContainerHighest,
+                        contentColor = if (muted) cs.onTertiaryContainer else cs.onSurface,
+                    )
+                    IconKey(Icons.Rounded.Info, "Infos", { vm.button("INFO") })
+                }
+                Rocker("CH", vm::channelUp, vm::channelDown, upIcon = Icons.Rounded.KeyboardArrowUp, downIcon = Icons.Rounded.KeyboardArrowDown)
+            }
+
+            // Media controls
+            Row(
+                Modifier.fillMaxWidth().height(56.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                val shape = RoundedCornerShape(18.dp)
+                val m = Modifier.weight(1f).fillMaxWidth().height(56.dp)
+                MediaKey(Icons.Rounded.FastRewind, "Retour rapide", vm::rewind, m, shape)
+                MediaKey(Icons.Rounded.PlayArrow, "Lecture", vm::play, m, shape, primary = true)
+                MediaKey(Icons.Rounded.Pause, "Pause", vm::pause, m, shape)
+                MediaKey(Icons.Rounded.Stop, "Stop", vm::stop, m, shape)
+                MediaKey(Icons.Rounded.FastForward, "Avance rapide", vm::fastForward, m, shape)
+            }
         }
     }
 

@@ -260,6 +260,8 @@ fun SettingsSheet(vm: RemoteViewModel, onDismiss: () -> Unit) {
     val tvName by vm.tvName.collectAsStateWithLifecycle()
     val state by vm.state.collectAsStateWithLifecycle()
     val hapticLevel by vm.hapticLevel.collectAsStateWithLifecycle()
+    val handedness by vm.handedness.collectAsStateWithLifecycle()
+    val oneHandScale by vm.oneHandScale.collectAsStateWithLifecycle()
     var macField by remember(mac) { mutableStateOf(mac ?: "") }
     RemoteSheet("Réglages", onDismiss) {
         Column(Modifier.padding(horizontal = 24.dp).imePadding(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -274,6 +276,7 @@ fun SettingsSheet(vm: RemoteViewModel, onDismiss: () -> Unit) {
                 onChange = vm::setHapticLevel,
                 problem = remember { vm.haptics.problem() },
             )
+            OneHandedSetting(handedness, oneHandScale, vm::setHandedness, vm::setOneHandScale)
             OutlinedTextField(
                 value = macField,
                 onValueChange = { macField = it },

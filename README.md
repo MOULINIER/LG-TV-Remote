@@ -25,6 +25,7 @@ Téléchargez **[`apk/LG-Remote-1.0.apk`](apk/LG-Remote-1.0.apk)** sur le télé
 - **Clavier** : saisie de texte directement dans les champs de la TV
 - **Pavé numérique** + touches de couleur, menu rapide, liste des chaînes
 - **Extinction**, et **allumage par Wake-on-LAN** (adresse MAC détectée automatiquement, modifiable dans les réglages)
+- **Mode une main** (gaucher ou droitier) : la télécommande se réduit dans le coin inférieur, à portée du pouce, avec une taille réglable (60 à 90 %) ; un bouton dans l'espace libéré permet de changer de main
 - Retour haptique sur chaque touche, réglable dans les Réglages (désactivé, léger, moyen, fort)
 
 ## Prérequis côté TV

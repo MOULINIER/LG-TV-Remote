@@ -46,6 +46,26 @@ class ScreenshotTest {
 
     @Test fun remoteDark() { val vm = vm(); shot("remote_dark", true) { RemoteScreen(vm) } }
     @Test fun remoteLight() { val vm = vm(); shot("remote_light", false) { RemoteScreen(vm) } }
+    @Test fun remoteOneHanded() {
+        val vm = vm()
+        vm.setHandedness(com.moulinier.lgremote.ui.Handedness.Right)
+        vm.setOneHandScale(0.75f)
+        shot("remote_one_handed", true) { RemoteScreen(vm) }
+    }
+
+    @Test fun oneHandedSetting() {
+        compose.setContent {
+            LgRemoteTheme(dark = true) {
+                androidx.compose.material3.Surface(Modifier.testTag("hand"), color = MaterialTheme.colorScheme.surfaceContainerLow) {
+                    Box(Modifier.padding(24.dp)) {
+                        com.moulinier.lgremote.ui.OneHandedSetting(com.moulinier.lgremote.ui.Handedness.Right, 0.75f, {}, {})
+                    }
+                }
+            }
+        }
+        compose.onNodeWithTag("hand").captureRoboImage("../docs/one_handed_setting.png")
+    }
+
     @Test fun connectDark() {
         val vm = vm()
         shot("connect_dark", true) { ConnectScreen(vm, ConnectionState.Failed("192.168.1.42", "timeout")) }

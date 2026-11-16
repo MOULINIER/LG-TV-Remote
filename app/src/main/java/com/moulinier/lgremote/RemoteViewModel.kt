@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.moulinier.lgremote.ui.Handedness
 import com.moulinier.lgremote.ui.HapticLevel
 import com.moulinier.lgremote.ui.Haptics
 import com.moulinier.lgremote.tv.ConnectionState
@@ -58,6 +59,22 @@ class RemoteViewModel(app: Application) : AndroidViewModel(app) {
         haptics.level = level
         prefs.edit().putString("haptics", level.name).apply()
         haptics.preview(level) // let the user feel the new strength
+    }
+
+    private val _handedness = MutableStateFlow(Handedness.parse(prefs.getString("hand", null)))
+    val handedness = _handedness.asStateFlow()
+    private val _oneHandScale = MutableStateFlow(prefs.getFloat("hand_scale", Handedness.DEFAULT_SCALE))
+    val oneHandScale = _oneHandScale.asStateFlow()
+
+    fun setHandedness(value: Handedness) {
+        _handedness.value = value
+        prefs.edit().putString("hand", value.name).apply()
+    }
+
+    fun setOneHandScale(value: Float) {
+        val v = value.coerceIn(Handedness.MIN_SCALE, Handedness.MAX_SCALE)
+        _oneHandScale.value = v
+        prefs.edit().putFloat("hand_scale", v).apply()
     }
 
     private val _messages = MutableSharedFlow<String>(extraBufferCapacity = 4)
