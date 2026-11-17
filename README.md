@@ -2,12 +2,15 @@
 
 Android remote control for LG webOS TVs over Wi-Fi. Kotlin, Jetpack Compose, Material 3 with Material You dynamic colors.
 
-<p>
-<img src="docs/remote_dark.png" width="240"> <img src="docs/remote_light.png" width="240"> <img src="docs/remote_one_handed.png" width="240">
-</p>
-<p>
-<img src="docs/connect_dark.png" width="240"> <img src="docs/connecting_power_on.png" width="240">
-</p>
+<table>
+  <tr>
+    <td align="center"><img src="docs/remote_dark.png" width="160"><br><sub>Dark</sub></td>
+    <td align="center"><img src="docs/remote_light.png" width="160"><br><sub>Light</sub></td>
+    <td align="center"><img src="docs/remote_one_handed.png" width="160"><br><sub>One-handed</sub></td>
+    <td align="center"><img src="docs/connect_dark.png" width="160"><br><sub>Connect</sub></td>
+    <td align="center"><img src="docs/connecting_power_on.png" width="160"><br><sub>Power on</sub></td>
+  </tr>
+</table>
 
 ## Install
 
@@ -27,8 +30,9 @@ Your phone and TV must be on the same network. To turn the TV on remotely, enabl
 - One-handed mode for left or right hand, with an adjustable size (60–90 %)
 - Adjustable haptic feedback
 
-<p>
-<img src="docs/one_handed_setting.png" width="360"> <img src="docs/haptic_setting.png" width="360">
+<p align="center">
+<img src="docs/one_handed_setting.png" width="420"><br>
+<img src="docs/haptic_setting.png" width="420">
 </p>
 
 ## Build
