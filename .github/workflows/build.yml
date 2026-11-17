@@ -5,6 +5,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -37,3 +39,11 @@ jobs:
         with:
           name: LG-Remote-apk
           path: app/build/outputs/apk/release/app-release.apk
+      - name: Publish GitHub release
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          cp app/build/outputs/apk/release/app-release.apk "LG-Remote-${GITHUB_REF_NAME}.apk"
+          gh release create "$GITHUB_REF_NAME" "LG-Remote-${GITHUB_REF_NAME}.apk" \
+            --title "LG Remote ${GITHUB_REF_NAME}" --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}
