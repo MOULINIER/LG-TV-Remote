@@ -64,3 +64,7 @@ Certificate SHA-256: `eb4b919d3679167e29ac330bce536c7d3f2796e1bac17af4c584f21e9e
 ## How it works
 
 LG SSAP protocol over WebSocket (`wss://<tv>:3001`, falling back to `ws://<tv>:3000`). Buttons go through the pointer input socket. See [`WebOsClient.kt`](app/src/main/java/com/moulinier/lgremote/tv/WebOsClient.kt).
+
+## License
+
+Licensed under the [GNU General Public License v3.0](LICENSE).
