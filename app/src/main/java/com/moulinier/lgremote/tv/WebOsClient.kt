@@ -31,6 +31,8 @@ sealed interface ConnectionState {
     data class WaitingForPairing(val host: String) : ConnectionState
     data class Connected(val host: String) : ConnectionState
     data class Failed(val host: String, val message: String) : ConnectionState
+    /** We turned the TV off ourselves: no point trying to reconnect until it is powered on again. */
+    data class PoweredOff(val host: String) : ConnectionState
 }
 
 /**
@@ -59,6 +61,14 @@ class WebOsClient(private val scope: CoroutineScope) {
         val gen = ++generation
         _state.value = ConnectionState.Connecting(host)
         open(gen, host, clientKey, secure = true)
+    }
+
+    /** Turns the TV off, then drops the connection so the UI leaves the remote screen. */
+    suspend fun turnOff() {
+        val host = (_state.value as? ConnectionState.Connected)?.host ?: return
+        request("ssap://system/turnOff", timeoutMs = 2000)
+        disconnect()
+        _state.value = ConnectionState.PoweredOff(host)
     }
 
     fun disconnect() {

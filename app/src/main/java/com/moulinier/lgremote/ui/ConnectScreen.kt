@@ -43,6 +43,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -57,6 +58,7 @@ fun ConnectScreen(vm: RemoteViewModel, state: ConnectionState) {
     val scanning by vm.scanning.collectAsStateWithLifecycle()
     val tvName by vm.tvName.collectAsStateWithLifecycle()
     val mac by vm.mac.collectAsStateWithLifecycle()
+    val waking by vm.waking.collectAsStateWithLifecycle()
     var manual by rememberSaveable { mutableStateOf("") }
 
     Column(
@@ -81,9 +83,32 @@ fun ConnectScreen(vm: RemoteViewModel, state: ConnectionState) {
         )
 
         // Status of the last / current connection attempt
-        when (state) {
+        when {
+            waking -> StatusCard(
+                "Allumage de ${tvName ?: vm.lastHost ?: "la TV"}…",
+                "Connexion dès que la TV est prête.",
+                progress = true,
+            )
+            state is ConnectionState.PoweredOff -> StatusCard(
+                "${tvName ?: state.host} est éteinte",
+                if (mac != null) null else "Adresse MAC inconnue : allumez la TV avec sa télécommande, puis reconnectez-vous.",
+                icon = Icons.Rounded.PowerSettingsNew,
+                tone = StatusTone.Neutral,
+                actions = {
+                    TextButton(onClick = vm::forget) { Text("Oublier") }
+                    if (mac != null) {
+                        Button(onClick = vm::powerOn) {
+                            Icon(Icons.Rounded.PowerSettingsNew, null, Modifier.size(18.dp))
+                            Spacer(Modifier.size(8.dp))
+                            Text("Allumer la TV")
+                        }
+                    } else {
+                        Button(onClick = vm::reconnect) { Text("Reconnecter") }
+                    }
+                },
+            )
             // Offer power-on right away: a TV that is off only fails after the connect timeouts.
-            is ConnectionState.Connecting -> StatusCard(
+            state is ConnectionState.Connecting -> StatusCard(
                 "Connexion à ${tvName ?: state.host}…",
                 if (mac != null) "La TV est éteinte ? Allumez-la sans attendre." else null,
                 progress = true,
@@ -97,7 +122,7 @@ fun ConnectScreen(vm: RemoteViewModel, state: ConnectionState) {
                     }
                 } else null,
             )
-            is ConnectionState.Failed -> StatusCard(
+            state is ConnectionState.Failed -> StatusCard(
                 "Impossible de joindre ${tvName ?: state.host}",
                 state.message,
                 actions = {
@@ -164,22 +189,31 @@ fun ConnectScreen(vm: RemoteViewModel, state: ConnectionState) {
     }
 }
 
+private enum class StatusTone { Neutral, Error }
+
 @Composable
 private fun StatusCard(
     title: String,
     detail: String?,
     progress: Boolean = false,
+    icon: ImageVector = Icons.Rounded.ErrorOutline,
+    tone: StatusTone = StatusTone.Error,
     actions: (@Composable () -> Unit)? = null,
 ) {
+    val cs = MaterialTheme.colorScheme
     Card(
         Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = if (progress) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.errorContainer,
+            containerColor = when {
+                progress -> cs.secondaryContainer
+                tone == StatusTone.Neutral -> cs.surfaceContainerHigh
+                else -> cs.errorContainer
+            },
         ),
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                if (!progress) Icon(Icons.Rounded.ErrorOutline, null, Modifier.padding(end = 12.dp))
+                if (!progress) Icon(icon, null, Modifier.padding(end = 12.dp))
                 Text(title, style = MaterialTheme.typography.titleSmall)
             }
             if (progress) LinearProgressIndicator(Modifier.fillMaxWidth())

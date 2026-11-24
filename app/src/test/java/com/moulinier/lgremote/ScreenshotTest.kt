@@ -72,6 +72,12 @@ class ScreenshotTest {
         shot("connecting_power_on", true) { ConnectScreen(vm, ConnectionState.Connecting("192.168.1.42")) }
     }
 
+    @Test fun poweredOff() {
+        val vm = vm()
+        vm.setMac("AA:BB:CC:DD:EE:FF")
+        shot("powered_off", true) { ConnectScreen(vm, ConnectionState.PoweredOff("192.168.1.42")) }
+    }
+
     @Test fun connectDark() {
         val vm = vm()
         shot("connect_dark", true) { ConnectScreen(vm, ConnectionState.Failed("192.168.1.42", "timeout")) }

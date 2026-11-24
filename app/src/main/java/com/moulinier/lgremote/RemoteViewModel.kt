@@ -156,7 +156,13 @@ class RemoteViewModel(app: Application) : AndroidViewModel(app) {
     fun rewind() = client.send("ssap://media.controls/rewind")
     fun fastForward() = client.send("ssap://media.controls/fastForward")
 
-    fun powerOff() = client.send("ssap://system/turnOff")
+    fun powerOff() {
+        viewModelScope.launch { client.turnOff() }
+    }
+
+    /** True while a Wake-on-LAN power-on is in progress (waiting for the TV to boot). */
+    private val _waking = MutableStateFlow(false)
+    val waking = _waking.asStateFlow()
 
     fun powerOn() {
         val m = _mac.value
@@ -164,14 +170,26 @@ class RemoteViewModel(app: Application) : AndroidViewModel(app) {
             _messages.tryEmit("Adresse MAC inconnue : renseignez-la dans les réglages")
             return
         }
+        if (_waking.value) return
         viewModelScope.launch {
-            WakeOnLan.wake(m, lastHost)
-            _messages.tryEmit("Signal d'allumage envoyé…")
-            // Give the TV time to boot its network stack, then reconnect.
-            repeat(6) {
-                delay(3000)
-                if (state.value is ConnectionState.Connected) return@launch
-                reconnect()
+            _waking.value = true
+            try {
+                WakeOnLan.wake(m, lastHost)
+                // Give the TV time to boot its network stack, then reconnect.
+                repeat(8) {
+                    delay(3000)
+                    when (state.value) {
+                        is ConnectionState.Connected -> return@launch
+                        // Don't abort an attempt (or a pairing prompt) that is still running.
+                        is ConnectionState.Connecting, is ConnectionState.WaitingForPairing -> {}
+                        else -> reconnect()
+                    }
+                }
+                if (state.value !is ConnectionState.Connected) {
+                    _messages.tryEmit("La TV ne répond pas. Vérifiez qu'elle est branchée et sur le même réseau.")
+                }
+            } finally {
+                _waking.value = false
             }
         }
     }
