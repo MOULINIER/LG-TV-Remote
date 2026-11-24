@@ -1,4 +1,4 @@
-# LG Remote
+# LG TV Remote
 
 Android remote control for LG webOS TVs over Wi-Fi. Kotlin, Jetpack Compose, Material 3 with Material You dynamic colors.
 

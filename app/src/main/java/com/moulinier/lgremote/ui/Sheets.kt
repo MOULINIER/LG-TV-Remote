@@ -288,7 +288,7 @@ fun SettingsSheet(vm: RemoteViewModel, onDismiss: () -> Unit) {
             )
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedButton(onClick = { vm.setMac(macField) }, modifier = Modifier.weight(1f)) { Text("Enregistrer MAC") }
-                Button(onClick = { vm.toast("Bonjour depuis LG Remote 👋") }, enabled = state is ConnectionState.Connected, modifier = Modifier.weight(1f)) {
+                Button(onClick = { vm.toast("Bonjour depuis LG TV Remote 👋") }, enabled = state is ConnectionState.Connected, modifier = Modifier.weight(1f)) {
                     Text("Tester")
                 }
             }

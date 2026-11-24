@@ -74,7 +74,7 @@ fun ConnectScreen(vm: RemoteViewModel, state: ConnectionState) {
                 Icon(Icons.Rounded.Tv, null, Modifier.size(48.dp), tint = MaterialTheme.colorScheme.onPrimaryContainer)
             }
         }
-        Text("LG Remote", style = MaterialTheme.typography.headlineMedium)
+        Text("LG TV Remote", style = MaterialTheme.typography.headlineMedium)
         Text(
             "Connectez votre téléviseur LG webOS. Le téléphone et la TV doivent être sur le même réseau Wi-Fi.",
             style = MaterialTheme.typography.bodyMedium,

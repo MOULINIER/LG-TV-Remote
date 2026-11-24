@@ -48,7 +48,7 @@ jobs:
         run: |
           cp app/build/outputs/apk/release/app-release.apk "LG-Remote-${TAG}.apk"
           gh release create "$TAG" "LG-Remote-${TAG}.apk" --target "$GITHUB_SHA" \
-            --title "LG Remote ${TAG}" --generate-notes
+            --title "LG TV Remote ${TAG}" --generate-notes
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ inputs.release_tag || github.ref_name }}
